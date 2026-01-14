@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 interface DropzoneProps {
   onFileSelect: (file: File) => void;
@@ -7,9 +7,28 @@ interface DropzoneProps {
 }
 
 const Dropzone: React.FC<DropzoneProps> = ({ onFileSelect, disabled }) => {
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file) onFileSelect(file);
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!disabled) setIsDragging(true);
+  };
+
+  const onDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (disabled) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
       onFileSelect(file);
     }
   };
@@ -17,15 +36,21 @@ const Dropzone: React.FC<DropzoneProps> = ({ onFileSelect, disabled }) => {
   return (
     <div className="w-full">
       <label 
-        className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200
-          ${disabled ? 'bg-gray-100 border-gray-300 cursor-not-allowed' : 'bg-white border-blue-300 hover:bg-blue-50'}`}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        className={`relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-3xl cursor-pointer transition-all duration-300 overflow-hidden
+          ${disabled ? 'bg-gray-50 border-gray-200 cursor-not-allowed' : 
+            isDragging ? 'bg-emerald-50 border-emerald-500 scale-[0.99] shadow-inner' : 'bg-white border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/30'}`}
       >
-        <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
-          <svg className="w-10 h-10 mb-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-          </svg>
-          <p className="mb-2 text-sm font-semibold text-gray-700">Click to upload or drag and drop</p>
-          <p className="text-xs text-gray-500">PNG, JPG, or WEBP (Images only)</p>
+        <div className="flex flex-col items-center justify-center p-8 text-center z-10">
+          <div className={`p-4 rounded-2xl mb-4 transition-colors duration-300 ${isDragging ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-600'}`}>
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 mb-1">Upload Waste Photo</h3>
+          <p className="text-sm text-slate-500 max-w-[200px]">Drag your image here or click to browse files</p>
         </div>
         <input 
           type="file" 
@@ -34,6 +59,13 @@ const Dropzone: React.FC<DropzoneProps> = ({ onFileSelect, disabled }) => {
           onChange={handleChange} 
           disabled={disabled}
         />
+        {isDragging && (
+          <div className="absolute inset-0 bg-emerald-500/5 backdrop-blur-[1px] flex items-center justify-center">
+            <div className="bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-bounce">
+              Drop it!
+            </div>
+          </div>
+        )}
       </label>
     </div>
   );
