@@ -1,0 +1,5 @@
+{
+  "name": "EcoSnap - Browser Waste Classifier",
+  "description": "A lightweight, privacy-focused waste classification tool that runs entirely in your browser using TensorFlow.js and MobileNet. It identifies organic waste, plastics, paper, metals, glass, and e-waste without sending your data to any server.",
+  "requestFramePermissions": []
+}
